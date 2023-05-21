@@ -1,7 +1,5 @@
 package org.example.TDAs;
 
-import org.example.TDAs.IBinaryTree;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,8 +50,28 @@ public class BinaryTree implements IBinaryTree {
         return right;
     }
 
+    public static int sumOfNonLeafNodes(BinaryTree root) {
+        if (root == null) {
+            return 0;
+        } else if (root.getLeft() == null && root.getRight() == null) {
+            return 0;  // Excluir nodos hoja
+        } else {
+            int sum = root.getValue();
+            sum += sumOfNonLeafNodes(root.getLeft());
+            sum += sumOfNonLeafNodes(root.getRight());
+            return sum;
+        }
+    }
 
-    // Preorder traversal: root -> left -> right
+    public static void printBinaryTree(BinaryTree node) {
+        if (node != null) {
+            System.out.print(node.getValue() + " ");
+            printBinaryTree(node.getLeft());
+            printBinaryTree(node.getRight());
+        }
+    }
+
+    // Recorrido en preorden: raíz -> izquierda -> derecha
     public List<Integer> preorderTraversal() {
         List<Integer> traversal = new ArrayList<>();
         preorderTraversal(this, traversal);
@@ -68,7 +86,7 @@ public class BinaryTree implements IBinaryTree {
         }
     }
 
-    // Inorder traversal: left -> root -> right
+    // Recorrido en orden: izquierda -> raíz -> derecha
     public List<Integer> inorderTraversal() {
         List<Integer> traversal = new ArrayList<>();
         inorderTraversal(this, traversal);
@@ -83,7 +101,7 @@ public class BinaryTree implements IBinaryTree {
         }
     }
 
-    // Postorder traversal: left -> right -> root
+    // Recorrido en postorden: izquierda -> derecha -> raíz
     public List<Integer> postorderTraversal() {
         List<Integer> traversal = new ArrayList<>();
         postorderTraversal(this, traversal);
@@ -98,7 +116,7 @@ public class BinaryTree implements IBinaryTree {
         }
     }
 
-    // Method to check if a value is present in the tree
+    // Método para verificar si un valor está presente en el árbol
     public boolean contains(int value) {
         return contains(this, value);
     }
@@ -113,7 +131,7 @@ public class BinaryTree implements IBinaryTree {
         return contains(node.left, value) || contains(node.right, value);
     }
 
-    // Method to get the height of the tree
+    // Método para obtener la altura del árbol
     public int getHeight() {
         return getHeight(this);
     }
@@ -127,7 +145,7 @@ public class BinaryTree implements IBinaryTree {
         return Math.max(leftHeight, rightHeight) + 1;
     }
 
-    // Method to count the number of nodes in the tree
+    // Método para contar el número de nodos en el árbol
     public int countNodes() {
         return countNodes(this);
     }
@@ -138,23 +156,55 @@ public class BinaryTree implements IBinaryTree {
         }
         return countNodes(node.left) + countNodes(node.right) + 1;
     }
-    public BinaryTree findHighestABB(BinaryTree root) {
-        if (root == null) {
+
+    public int findMinimumLeafValue() {
+        if (this == null) {
+            throw new IllegalArgumentException("El árbol binario está vacío.");
+        }
+
+        if (this.getLeft() == null && this.getRight() == null) {
+            // Caso base: el nodo actual es una hoja
+            return this.getValue();
+        }
+
+        int leftMin = Integer.MAX_VALUE;
+        int rightMin = Integer.MAX_VALUE;
+
+        if (this.getLeft() != null) {
+            // Encontrar recursivamente el valor mínimo en el subárbol izquierdo
+            leftMin = this.getLeft().findMinimumLeafValue();
+        }
+
+        if (this.getRight() != null) {
+            // Encontrar recursivamente el valor mínimo en el subárbol derecho
+            rightMin = this.getRight().findMinimumLeafValue();
+        }
+
+        // Devolver el valor mínimo entre los nodos hoja
+        return Math.min(leftMin, rightMin);
+    }
+
+    public int sumOfNonLeafsByMinLeaf(BinaryTree tree) {
+        return (tree.findMinimumLeafValue() * sumOfNonLeafNodes(tree));
+    }
+
+    public BinaryTree findHighestABB() {
+        if (this == null) {
             return null;
         }
 
-        // Verifica si el árbol actual es un ABB
-        if (isABB(root)) {
-            return root;
+        // Verificar si el árbol actual es un ABB
+        if (isABB(this)) {
+            return this;
         }
 
-        // Encuentra recursivamente el ABB más alto en los subárboles izquierdo y derecho
-        BinaryTree leftABB = findHighestABB(root.getLeft());
-        BinaryTree rightABB = findHighestABB(root.getRight());
+        // Encontrar recursivamente el ABB más alto en los subárboles izquierdo y derecho
+        BinaryTree leftABB = this.getLeft().findHighestABB();
+        BinaryTree rightABB = this.getRight().findHighestABB();
 
-        // Retorna el ABB más alto encontrado entre el árbol actual y sus subárboles
+        // Devolver el ABB más alto encontrado entre el árbol actual y sus subárboles
         if (leftABB != null && rightABB != null) {
-            // Ambos subárboles son ABBs, así que retorna el que tenga mayor altura
+            // Ambos subárboles son ABBs, así que devolver el que tenga mayor altura
             return (leftABB.getHeight() >= rightABB.getHeight()) ? leftABB : rightABB;
         } else if (leftABB != null) {
             // Solo el subárbol izquierdo es un ABB
@@ -181,10 +231,8 @@ public class BinaryTree implements IBinaryTree {
             return false;
         }
 
-        // Verifica recursivamente si los subárboles izquierdo y derecho también son ABBs
-        return isABB(node.getLeft(), min, + node.getValue() - 1) &&
+        // Verificar recursivamente si los subárboles izquierdo y derecho también son ABBs
+        return isABB(node.getLeft(), min, +node.getValue() - 1) &&
                 isABB(node.getRight(), node.getValue() + 1, max);
     }
-
 }
-
